@@ -2,47 +2,43 @@ package main
 
 import (
 	"testing"
+	s "tdd/stocks"
 )
 
-func assertEqual(t *testing.T, expected Money, actual Money) {
+func assertEqual(t *testing.T, expected s.Money, actual s.Money) {
 	if expected != actual {
 		t.Errorf("Expected %+v Got %+v", expected, actual)
 	}
 }
 
-func TestMultiplicationInDollars(t *testing.T) {
-	originalMoney := Money{amount: 5, currency: "USD"}
-	actualResult := originalMoney.Times(2)
-	
-	expectedResult := Money{amount: 10, currency: "USD"}
-	assertEqual(t, expectedResult, actualResult)	
-}
-
 func TestMultiplicationInEuros(t *testing.T) {
-	originalMoney:= Money{amount: 10, currency: "EUR"}
-	actualResult := originalMoney.Times(2)
+	original:= s.NewMoney(10, "EUR")
+	actualResult := original.Times(2)
 
-	expectedResult := Money{amount: 20, currency: "EUR"}
+	expectedResult := s.NewMoney(20, "EUR")
 	assertEqual(t, expectedResult, actualResult)	
 }
 
 func TestDivision(t *testing.T) {
-	originalMoney := Money{amount: 4002, currency: "KRW"}
-	actualMoneyAfterDivision := originalMoney.Divide(4)
+	original := s.NewMoney(4002, "KRW")
+	actualResult := original.Divide(4)
 	
-	expectedMoneyAfterDivision := Money{amount: 1000.5, currency: "KRW"}
-	assertEqual(t, expectedMoneyAfterDivision, actualMoneyAfterDivision)	
+	expectedResult := s.NewMoney(1000.5, "KRW")
+	assertEqual(t, expectedResult, actualResult)	
 }
 
-type Money struct {
-	amount float64
-	currency string
+func TestAddition(t *testing.T) {
+	var portfolio s.Portfolio
+	var portfolioInDollars s.Money
+
+	fiveDollars := s.NewMoney(5, "USD")
+	tenDollars := s.NewMoney(10, "USD")
+	fifteenDollars := s.NewMoney(15, "USD")
+
+	portfolio = portfolio.Add(fiveDollars)
+	portfolio = portfolio.Add(tenDollars)
+	portfolioInDollars = portfolio.Evaluate("USD")
+
+	assertEqual(t, fifteenDollars, portfolioInDollars)
 }
 
-func (m Money) Times(multiplier int) Money {
-	return Money{amount: m.amount*float64(multiplier), currency: m.currency}
-}
-
-func (m Money) Divide(divisor int) Money {
-	return Money{amount: m.amount/float64(divisor), currency: m.currency}
-}
