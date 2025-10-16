@@ -8,7 +8,7 @@ import (
 
 var bank s.Bank
 
-func init() {
+func initExchangeRates() {
 	bank = s.NewBank()
 	bank.AddExchangeRate("EUR", "USD", 1.2)
 	bank.AddExchangeRate("USD", "KRW", 1100)
@@ -39,6 +39,8 @@ func TestDivision(t *testing.T) {
 func TestAddition(t *testing.T) {
 	var portfolio s.Portfolio
 
+	initExchangeRates()
+
 	fiveDollars := s.NewMoney(5, "USD")
 	tenDollars := s.NewMoney(10, "USD")
 	fifteenDollars := s.NewMoney(15, "USD")
@@ -52,6 +54,8 @@ func TestAddition(t *testing.T) {
 
 func TestAdditionOfDollarsAndEuros(t *testing.T) {
 	var portfolio s.Portfolio
+
+	initExchangeRates()
 
 	fiveDollars := s.NewMoney(5, "USD")
 	tenEuros := s.NewMoney(10, "EUR")
@@ -67,6 +71,8 @@ func TestAdditionOfDollarsAndEuros(t *testing.T) {
 func TestAdditionOfDollarsAndWons(t *testing.T) {
 	var portfolio s.Portfolio
 
+	initExchangeRates()
+
 	oneDollar := s.NewMoney(1, "USD")
 	elevenHundredWon := s.NewMoney(1100, "KRW")
 
@@ -81,6 +87,8 @@ func TestAdditionOfDollarsAndWons(t *testing.T) {
 
 func TestAdditionWithMultipleMissingExchangeRates(t *testing.T) {
 	var portfolio s.Portfolio
+
+	initExchangeRates()
 
 	oneDollar := s.NewMoney(1, "USD")
 	oneEuro := s.NewMoney(1, "EUR")
@@ -99,9 +107,22 @@ func TestAdditionWithMultipleMissingExchangeRates(t *testing.T) {
 	}
 }
 
-func TestConversion(t *testing.T) {
-	bank := s.NewBank()
-	bank.AddExchangeRate("EUR", "USD", 1.2)
+func TestConversionWithDifferenceRatesBetwenenTwoCurrencies(t *testing.T) {
+	initExchangeRates()
+
+	tenEuros := s.NewMoney(10, "EUR")
+	actualConvertedMoney, err := bank.Convert(tenEuros, "USD")
+	assertNil(t, err)
+	assertEqual(t, s.NewMoney(12, "USD"), *actualConvertedMoney)
+	bank.AddExchangeRate("EUR", "USD", 1.3)
+	actualConvertedMoney, err = bank.Convert(tenEuros, "USD")
+	assertNil(t, err)
+	assertEqual(t, s.NewMoney(13, "USD"), *actualConvertedMoney)
+}
+
+func TestWhatIsTheConversionRateFromEURToUSD(t *testing.T) {
+	initExchangeRates()
+
 	tenEuros := s.NewMoney(10, "EUR")
 	actualConvertedMoney, err := bank.Convert(tenEuros, "USD")
 	assertNil(t, err)
@@ -115,12 +136,13 @@ func assertNil(t *testing.T, actual interface{}) {
 }
 
 func TestConversionWithMissingExchangeRate(t *testing.T) {
+	initExchangeRates()
+
 	bank := s.NewBank()
 	tenEuros := s.NewMoney(10, "EUR")
 	actualConvertedMoney, err := bank.Convert(tenEuros, "Kalganid")
 	assertNil(t, actualConvertedMoney)
-	//if actualConvertedMoney != nil {
-	//	t.Errorf("Expected money to be nil, found: [%+v]", *actualConvertedMoney)
-	//}
 	assertEqual(t, "EUR->Kalganid", err.Error())
 }
+
+
